@@ -122,30 +122,54 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     // and may be removed
     //command[count] = command[count];
 
-    int kidpid;
+    int status;
     int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
-
     if (fd < 0) {
-        perror("open");
-        return false;
+	    perror("open");
+	    return false;
     }
-    switch (kidpid = fork()) {
-        case -1:
-            perror("fork");
+
+    pid_t pid = fork();
+    if (pid == -1){
+	    close(fd);
+	    return false;
+    }
+
+    if (!pid){
+	    if (dup2(fd,1) == -1){
+		    close(fd);
+		    return false;
+	    }
+
+	    if (execv(command[0],command) == -1){
+		    close(fd);
+		    return false;
+	    }
+
+	    close(fd);
+    }
+
+    if (waitpid(pid, &status, 0) == -1){
+	    close(fd);
+	    va_end(args);
             return false;
-        case 0:
-            if (dup2(fd, 1) < 0) {
-                perror("dup2");
-                return false;
-            }
-            close(fd);
-            execvp(cmd, args);
-            perror("execvp");
-            return false;
-        default:
-            close(fd);
-    /* do whatever the parent wants to do. */
-}
+    }
+
+    else if (WIFEXITED(status)){
+
+       	    if (WEXITSTATUS(status) == 0){
+		    close(fd);
+                    va_end(args);
+		    return true;
+	    }
+
+	    else if (WEXITSTATUS(status) == 1){
+		    close(fd);
+           	    va_end(args);
+		    return false;
+	    }
+
+    }
 
 /*
  * TODO
