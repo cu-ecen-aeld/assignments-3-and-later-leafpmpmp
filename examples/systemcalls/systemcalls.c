@@ -1,4 +1,13 @@
+#include <errno.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "systemcalls.h"
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -127,7 +136,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         case 0:
             if (dup2(fd, 1) < 0) {
                 perror("dup2");
-                return flase;
+                return false;
             }
             close(fd);
             execvp(cmd, args);
