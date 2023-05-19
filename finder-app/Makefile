@@ -1,8 +1,12 @@
-CC=
+CC=gcc
+CFLAGS=-Wall -std=c11
 
-writer: writer.o
-	$(CC)gcc -o writer writer.o
-writer.o: writer.c
-	$(CC)gcc -c writer.c
+SRC=writer.c
+OUTPUT=writer
+
+all: clean $(OUTPUT)
+
+writer: $(SRC)
+	$(CROSS_COMPILE)$(CC) $(CFLAGS) -o $(OUTPUT) $(SRC)
 clean:
-	-rm -f writer writer.o
+	rm -f $(OUTPUT)
