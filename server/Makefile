@@ -1,14 +1,19 @@
-CC = $(CROSS_COMPILE)gcc
+CC = gcc
+CFLAGS = -Wall -Werror
+LDFLAGS=
+CROSS_COMPILE =
 
-CFLAGS  = -Wall -Werror
-LDFLAGS = -g -pthread -lrt
+EXE = aesdsocket
+SOURCES=aesdsocket.c
+OBJECTS=$(SOURCES:.c=.o) # replace .c to .o of all the sources file
 
-TARGET = aesdsocket
+all: $(EXE) $(OBJECTS)
 
-all: $(TARGET)
+$(EXE): $(OBJECTS)
+	$(CROSS_COMPILE)$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
-$(TARGET): $(TARGET).c
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c $(LDFLAGS)
+$(OBJECTS): $(SOURCES)
+	$(CROSS_COMPILE)$(CC) $(CFLAGS) -c $<
 
 clean:
-	$(RM) $(TARGET) $(TARGET).o
+	rm -f $(EXE) $(OBJECTS)
